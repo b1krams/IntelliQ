@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://intelliq.deloitte.com/schemas/request.schema.json",
+  "title": "WorkflowRequest",
+  "type": "object",
+  "required": ["action"],
+  "properties": {
+    "workflow_id": {
+      "type": "string",
+      "description": "Unique identifier of the workflow session"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "init_workflow",
+        "generate_brd",
+        "refine_brd",
+        "generate_epics",
+        "refine_epics",
+        "generate_stories",
+        "refine_stories",
+        "generate_test_cases",
+        "refine_test_cases",
+        "approve_stage"
+      ],
+      "description": "Action to execute in the pipeline"
+    },
+    "stage": {
+      "type": "string",
+      "enum": ["intake", "brd", "epics", "stories", "test_cases", "export"],
+      "default": "intake"
+    },
+    "user_prompt": {
+      "type": "string",
+      "description": "User notes, project overview, or transcription text",
+      "default": ""
+    },
+    "feedback": {
+      "type": "string",
+      "description": "Conversational tuning or feedback instructions",
+      "default": ""
+    },
+    "target_id": {
+      "type": "string",
+      "description": "Target Epic ID or Story ID if refining a single item"
+    },
+    "attachments": {
+      "type": "array",
+      "description": "Uploaded transcripts, architecture diagrams, PDFs",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "mime_type", "s3_key"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "mime_type": { "type": "string" },
+          "s3_key": { "type": "string" },
+          "size_bytes": { "type": "integer" }
+        }
+      },
+      "default": []
+    },
+    "model_preference": {
+      "type": "string",
+      "default": "auto"
+    }
+  },
+  "additionalProperties": false
+}
+

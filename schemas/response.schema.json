@@ -1,0 +1,211 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://intelliq.deloitte.com/schemas/response.schema.json",
+  "title": "WorkflowState",
+  "type": "object",
+  "required": ["workflow_id", "current_stage", "status", "ai_insights"],
+  "properties": {
+    "workflow_id": { "type": "string" },
+    "current_stage": {
+      "type": "string",
+      "enum": ["intake", "brd", "epics", "stories", "test_cases", "export"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["idle", "processing", "review_required", "approved", "completed", "error"]
+    },
+    "title": { "type": "string", "default": "Untitled Project" },
+    "brd": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "version": { "type": "string", "default": "1.0" },
+        "executive_summary": { "type": "string" },
+        "business_objectives": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "stakeholders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["role", "responsibilities"],
+            "properties": {
+              "role": { "type": "string" },
+              "department": { "type": "string", "default": "" },
+              "responsibilities": { "type": "string" }
+            }
+          }
+        },
+        "in_scope": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "out_of_scope": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "functional_requirements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "title", "description", "priority"],
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "description": { "type": "string" },
+              "priority": { "type": "string", "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"] }
+            }
+          }
+        },
+        "non_functional_requirements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["category", "specification"],
+            "properties": {
+              "category": { "type": "string" },
+              "specification": { "type": "string" }
+            }
+          }
+        },
+        "assumptions_and_risks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["type", "description", "mitigation"],
+            "properties": {
+              "type": { "type": "string", "enum": ["ASSUMPTION", "RISK", "DEPENDENCY"] },
+              "description": { "type": "string" },
+              "mitigation": { "type": "string" }
+            }
+          }
+        },
+        "compliance_regulatory": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "epics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "summary", "business_value", "priority"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "summary": { "type": "string" },
+          "business_value": { "type": "string" },
+          "priority": { "type": "string", "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"] },
+          "dependencies": {
+            "type": "array",
+            "items": { "type": "string" },
+            "default": []
+          },
+          "acceptance_criteria": {
+            "type": "array",
+            "items": { "type": "string" },
+            "default": []
+          }
+        }
+      },
+      "default": []
+    },
+    "stories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "epic_id", "title", "user_role", "capability", "benefit", "acceptance_criteria_gherkin"],
+        "properties": {
+          "id": { "type": "string" },
+          "epic_id": { "type": "string" },
+          "title": { "type": "string" },
+          "user_role": { "type": "string" },
+          "capability": { "type": "string" },
+          "benefit": { "type": "string" },
+          "priority": { "type": "string", "enum": ["MUST_HAVE", "SHOULD_HAVE", "COULD_HAVE", "WONT_HAVE"], "default": "MUST_HAVE" },
+          "story_points": { "type": "integer", "default": 3 },
+          "acceptance_criteria_gherkin": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "technical_notes": { "type": "string", "default": "" }
+        }
+      },
+      "default": []
+    },
+    "test_cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "story_id", "epic_id", "title", "test_type", "priority", "steps"],
+        "properties": {
+          "id": { "type": "string" },
+          "story_id": { "type": "string" },
+          "epic_id": { "type": "string" },
+          "title": { "type": "string" },
+          "test_type": { "type": "string", "enum": ["POSITIVE", "NEGATIVE", "BOUNDARY", "SECURITY", "PERFORMANCE"] },
+          "priority": { "type": "string", "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"] },
+          "preconditions": {
+            "type": "array",
+            "items": { "type": "string" },
+            "default": []
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["step_number", "action", "expected_result"],
+              "properties": {
+                "step_number": { "type": "integer" },
+                "action": { "type": "string" },
+                "expected_result": { "type": "string" }
+              }
+            }
+          },
+          "postconditions": { "type": "string", "default": "" },
+          "test_data": { "type": "string", "default": "" }
+        }
+      },
+      "default": []
+    },
+    "ai_insights": {
+      "type": "object",
+      "required": ["confidence_score", "rationale_bullets"],
+      "properties": {
+        "confidence_score": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.95 },
+        "rationale_bullets": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        },
+        "ambiguities_flagged": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        },
+        "suggested_actions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        }
+      }
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["timestamp", "actor", "action", "details"],
+        "properties": {
+          "timestamp": { "type": "string" },
+          "actor": { "type": "string", "enum": ["AGENT", "USER", "GATEWAY"] },
+          "action": { "type": "string" },
+          "details": { "type": "string" }
+        }
+      },
+      "default": []
+    }
+  }
+}
+

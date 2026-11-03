@@ -1,0 +1,21 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}",
+    "${workspaceFolder}/core",
+    "${workspaceFolder}/lambdas/stream_worker",
+    "${workspaceFolder}/lambdas/api_handler"
+  ],
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    }
+  },
+  "svelte.enable-ts-plugin": true,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true
+}
+

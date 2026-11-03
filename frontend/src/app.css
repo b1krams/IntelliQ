@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-deloitte-green: #86BC25;
+  --color-deloitte-green-accessible: #628f14;
+  --color-deloitte-green-dark: #4c750b;
+  --color-deloitte-black: #000000;
+  --font-display: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-sans: "Open Sans", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+/* Enforce rigid architectural layout structures universally */
+*,
+*::before,
+*::after {
+  border-radius: 0px !important;
+}
+
+.font-display {
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.font-mono {
+  font-family: "JetBrains Mono", monospace;
+}
+
+:focus-visible {
+  outline: 2px solid #000000 !important;
+  outline-offset: 1px !important;
+}
+
+.dark :focus-visible {
+  outline: 2px solid #86BC25 !important;
+  outline-offset: 1px !important;
+}
+
+/* Custom scrollbar matching rigid aesthetics */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #a8a8b0;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #404040;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #86BC25;
+}
+
+/* Clean Print Optimization */
+@media print {
+  header,
+  aside,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  main {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+}
+

@@ -1,0 +1,21 @@
+{
+  "name": "intelliq",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "sst dev",
+    "provision:aws": "uv run python scripts/provision_aws.py",
+    "build": "sst deploy --stage prod",
+    "deploy": "sst deploy",
+    "frontend:dev": "npm run dev --prefix frontend",
+    "frontend:build": "npm run build --prefix frontend",
+    "generate:types": "bash scripts/generate_types.sh"
+  },
+  "devDependencies": {
+    "sst": "^3.9.0",
+    "typescript": "^5.7.0",
+    "@types/node": "^22.10.0"
+  }
+}
+

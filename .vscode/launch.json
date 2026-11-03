@@ -1,0 +1,49 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Frontend: Vite Dev",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "frontend"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Backend: SST Dev",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["sst", "dev"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Backend: Stream Worker (Uvicorn Direct)",
+      "type": "python",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": [
+        "lambdas.stream_worker.main:app",
+        "--host", "127.0.0.1",
+        "--port", "8080",
+        "--reload"
+      ],
+      "jinja": false,
+      "justMyCode": true,
+      "env": {
+        "AWS_REGION": "us-east-1",
+        "GEMINI_API_KEY": "${env:GEMINI_API_KEY}",
+        "GEMINI_MODEL": "gemini-2.5-flash"
+      }
+    },
+    {
+      "name": "Python: Pytest All",
+      "type": "python",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["-v", "tests/"],
+      "console": "integratedTerminal"
+    }
+  ]
+}
+
