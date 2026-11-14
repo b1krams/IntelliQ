@@ -134,7 +134,7 @@ export default $config({
         $interpolate`arn:aws:lambda:${region}:753240598075:layer:LambdaAdapterLayerArm64:24`,
       ],
       environment: {
-        PYTHONPATH: "/var/task/intelliq",
+        PYTHONPATH: "/var/task:/var/task/intelliq",
         AWS_LAMBDA_EXEC_WRAPPER: "/opt/bootstrap",
         AWS_LWA_INVOKE_MODE: "response_stream",
         AWS_LWA_READINESS_CHECK_PATH: "/api/health",
@@ -174,8 +174,13 @@ export default $config({
       },
     });
     // -------------------------------------------------------------------------
-    // ADR-03 & ADR-07: Static Frontend SPA & Single-Domain CloudFront
+    // ADR-03 & ADR-07: Single CloudFront Distribution via Router
     // -------------------------------------------------------------------------
+    const router = new sst.aws.Router("EdgeRouter");
+
+    router.route("/api/stream", streamWorker.url);
+    router.route("/api", apiHandler.url);
+
     const site = new sst.aws.StaticSite("Frontend", {
       path: "frontend",
       build: {
@@ -187,23 +192,15 @@ export default $config({
         VITE_COGNITO_CLIENT_ID: userPoolClient.id,
         VITE_AWS_REGION: region,
       },
-      edge: {
-        viewerRequest: undefined,
+      router: {
+        instance: router,
       },
       invalidation: false, // ADR-07: Instant zero-cost deploys via Cache-Control
     });
-    // CloudFront router linking Frontend and Lambda Function URLs
-    const router = new sst.aws.Router("EdgeRouter", {
-      routes: {
-        "/api/stream/*": streamWorker.url,
-        "/api/*": apiHandler.url,
-        "/*": site.url,
-      },
-    });
+
     return {
       region,
-      routerUrl: router.url,
-      frontendUrl: site.url,
+      appUrl: router.url,
       bucketName: bucket.name,
       tableName: table.name,
       userPoolId: userPool.id,

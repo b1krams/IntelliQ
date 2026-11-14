@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import tailwindcss from '@tailwindcss/vite';
@@ -7,6 +8,10 @@ export default defineConfig({
     svelte(),
     tailwindcss(),
   ],
+  test: {
+    environment: 'happy-dom',
+    globals: true,
+  },
   server: {
     port: 5173,
     proxy: {

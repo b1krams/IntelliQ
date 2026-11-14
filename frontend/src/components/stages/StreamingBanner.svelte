@@ -5,7 +5,11 @@
 </script>
 
 {#if workflowStore.isStreaming}
-  <div class="bg-neutral-950 text-white border-2 border-neutral-700 p-4 space-y-3 shadow-lg">
+  <div
+    role="status"
+    aria-live="polite"
+    class="bg-neutral-950 text-white border-2 border-neutral-700 p-4 space-y-3 shadow-lg"
+  >
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-3">
         <span class="w-3 h-3 bg-[#86BC25] animate-pulse"></span>
@@ -39,7 +43,7 @@
 
     {#if showPreview && workflowStore.streamingRawText}
       <div class="p-3 bg-neutral-900 border border-neutral-800 font-mono text-[11px] text-[#86BC25] max-h-48 overflow-y-auto whitespace-pre-wrap">
-        {workflowStore.streamingRawText}
+        {workflowStore.healedStreamingText}
       </div>
     {/if}
   </div>

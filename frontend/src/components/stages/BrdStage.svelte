@@ -306,7 +306,6 @@
                 <th class="py-3 px-4 font-extrabold w-24">Req ID</th>
                 <th class="py-3 px-4 font-extrabold w-64">Requirement Title</th>
                 <th class="py-3 px-4 font-extrabold">Detailed Specification</th>
-                <th class="py-3 px-4 font-extrabold w-28">Priority</th>
               </tr>
             </thead>
             <tbody class="divide-y-2 divide-neutral-200 dark:divide-neutral-800">
@@ -315,11 +314,6 @@
                   <td class="py-3.5 px-4 font-mono font-bold text-neutral-900 dark:text-neutral-100">{req.id}</td>
                   <td class="py-3.5 px-4 font-bold text-neutral-950 dark:text-white font-display">{req.title}</td>
                   <td class="py-3.5 px-4 text-neutral-700 dark:text-neutral-300 leading-relaxed">{req.description}</td>
-                  <td class="py-3.5 px-4">
-                    <span class="px-2 py-0.5 text-[10px] font-mono font-black border border-neutral-400 {req.priority === 'CRITICAL' ? 'bg-red-100 dark:bg-red-950 text-red-950 dark:text-red-200' : 'bg-neutral-100 dark:bg-neutral-800'}">
-                      {req.priority}
-                    </span>
-                  </td>
                 </tr>
               {/each}
             </tbody>

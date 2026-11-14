@@ -39,10 +39,13 @@ export class SseStreamParser {
         continue;
       }
 
-      if (trimmed.startsWith('event:')) {
-        this.currentEvent = trimmed.slice(6).trim();
-      } else if (trimmed.startsWith('data:')) {
-        const dataPart = trimmed.slice(5).trim();
+      if (line.startsWith('event:')) {
+        let ev = line.slice(6);
+        if (ev.startsWith(' ')) ev = ev.slice(1);
+        this.currentEvent = ev.trim();
+      } else if (line.startsWith('data:')) {
+        let dataPart = line.slice(5);
+        if (dataPart.startsWith(' ')) dataPart = dataPart.slice(1);
         this.currentData = this.currentData ? `${this.currentData}\n${dataPart}` : dataPart;
       }
     }
@@ -57,7 +60,8 @@ export class SseStreamParser {
       return evt;
     }
     if (this.buffer.startsWith('data:')) {
-      const data = this.buffer.slice(5).trim();
+      let data = this.buffer.slice(5);
+      if (data.startsWith(' ')) data = data.slice(1);
       this.buffer = '';
       return { event: this.currentEvent || 'message', data };
     }
@@ -104,13 +108,43 @@ export class RafTokenBatcher {
 }
 
 /**
- * Auto-heals unclosed markdown code blocks so partial streams render cleanly without breaking syntax.
+ * Auto-heals unclosed markdown fences (code blocks, inline code, and structural tables)
+ * so partial token streams render safely without corrupting UI layout (ADR-10).
  */
 export function healMarkdownFences(markdown: string): string {
-  const codeBlockMatches = markdown.match(/```/g);
-  if (codeBlockMatches && codeBlockMatches.length % 2 !== 0) {
-    return `${markdown}\n\`\`\``;
+  if (!markdown) return '';
+
+  let healed = markdown;
+
+  // 1. Detect and close unclosed code blocks (``` or ~~~)
+  const codeBlockMatches = healed.match(/```/g) || [];
+  if (codeBlockMatches.length % 2 !== 0) {
+    healed = `${healed}\n\`\`\``;
+  } else {
+    const tildeMatches = healed.match(/~~~/g) || [];
+    if (tildeMatches.length % 2 !== 0) {
+      healed = `${healed}\n~~~`;
+    }
   }
-  return markdown;
+
+  // 2. Detect and heal unclosed structural markdown tables
+  const lines = healed.split(/\r?\n/);
+  const lastLine = lines[lines.length - 1];
+  const trimmedLast = lastLine.trim();
+  if (trimmedLast.startsWith('|') && !trimmedLast.endsWith('|')) {
+    healed = `${healed} |`;
+  }
+
+  // 3. Heal unclosed single backtick inline code spans outside code blocks
+  const isInsideCodeBlock = (healed.match(/```/g) || []).length % 2 !== 0;
+  if (!isInsideCodeBlock) {
+    const textOutsideFences = healed.replace(/```[\s\S]*?```/g, '');
+    const singleBackticks = (textOutsideFences.match(/`/g) || []).length;
+    if (singleBackticks % 2 !== 0) {
+      healed = `${healed}\``;
+    }
+  }
+
+  return healed;
 }
 

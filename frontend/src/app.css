@@ -3,10 +3,10 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-deloitte-green: #86BC25;
-  --color-deloitte-green-accessible: #628f14;
-  --color-deloitte-green-dark: #4c750b;
-  --color-deloitte-black: #000000;
+  --color-accent-green: #86BC25;
+  --color-accent-green-accessible: #628f14;
+  --color-accent-green-dark: #4c750b;
+  --color-accent-black: #000000;
   --font-display: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-sans: "Open Sans", Arial, sans-serif;
   --font-mono: "JetBrains Mono", monospace;

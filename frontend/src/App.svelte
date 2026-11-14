@@ -1,6 +1,8 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { auth } from './lib/auth.svelte';
   import { workflowStore } from './lib/stores.svelte';
+  import { initUrlSync } from './lib/url_sync';
   import Header from './components/Header.svelte';
   import LoginPage from './components/LoginPage.svelte';
   import WorkflowStepper from './components/WorkflowStepper.svelte';
@@ -13,7 +15,19 @@
   import AuditTrail from './components/AuditTrail.svelte';
 
   let showActivityDrawer = $state(false);
+
+  onMount(() => {
+    return initUrlSync(workflowStore);
+  });
 </script>
+
+<svelte:window
+  onkeydown={(e) => {
+    if (e.key === 'Escape' && showActivityDrawer) {
+      showActivityDrawer = false;
+    }
+  }}
+/>
 
 {#if !auth.isAuthenticated}
   <!-- DEDICATED FULL-PAGE LOGIN SCREEN -->
@@ -26,6 +40,7 @@
 
     <!-- Toast Notification Container -->
     <aside
+      role="status"
       aria-live="polite"
       aria-atomic="true"
       class="fixed bottom-6 right-6 z-50 transition-all duration-200 pointer-events-none bg-neutral-950 text-white dark:bg-white dark:text-neutral-950 px-4 py-3 border-2 shadow-2xl flex items-center gap-3 text-xs font-bold {workflowStore.toast.visible

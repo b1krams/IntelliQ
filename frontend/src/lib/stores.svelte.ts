@@ -3,7 +3,9 @@
  * Avoids deep JavaScript proxy overhead on large artifact payloads.
  */
 import { api } from './api';
+import { healMarkdownFences } from './stream_parser';
 import type { Attachment, Stage, WorkflowRequest, WorkflowState } from './types';
+import { updateUrlParams } from './url_sync';
 
 /**
  * Generate a 5-character uppercase alphanumeric Session ID.
@@ -56,6 +58,7 @@ class WorkflowStore {
   state = $state.raw<WorkflowState>(INITIAL_WORKFLOW_STATE);
   viewStage = $state<'intake' | 'brd' | 'epics' | 'stories' | 'test_cases'>('intake');
   streamingRawText = $state<string>('');
+  healedStreamingText = $derived(healMarkdownFences(this.streamingRawText));
   isStreaming = $state<boolean>(false);
   stagedAttachments = $state<Attachment[]>([]);
   activeTab = $state<'brd' | 'epics' | 'stories' | 'test_cases'>('brd');
@@ -240,6 +243,8 @@ class WorkflowStore {
     else if (newState.current_stage === 'stories') this.activeTab = 'stories';
     else if (newState.current_stage === 'test_cases' || newState.current_stage === 'export') this.activeTab = 'test_cases';
     else if (newState.current_stage === 'brd') this.activeTab = 'brd';
+
+    updateUrlParams(newState.workflow_id, this.viewStage);
   }
 
   setViewStage(stage: 'intake' | 'brd' | 'epics' | 'stories' | 'test_cases') {
@@ -247,6 +252,7 @@ class WorkflowStore {
     if (stage === 'brd' || stage === 'epics' || stage === 'stories' || stage === 'test_cases') {
       this.activeTab = stage;
     }
+    updateUrlParams(this.state.workflow_id, stage);
   }
 
   setSessionId(newId: string) {
@@ -256,6 +262,7 @@ class WorkflowStore {
       workflow_id: formatted,
       title: this.state.title.startsWith('Session ') ? `Session ${formatted}` : this.state.title,
     };
+    updateUrlParams(formatted, this.viewStage);
   }
 
   async loadSession(sessionId: string): Promise<boolean> {
@@ -288,6 +295,7 @@ class WorkflowStore {
     this.stagedAttachments = [];
     this.streamingRawText = '';
     this.isStreaming = false;
+    updateUrlParams(this.state.workflow_id, this.viewStage);
     this.showToast(`Started new session ${this.state.workflow_id}.`);
   }
 

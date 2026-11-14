@@ -126,19 +126,43 @@
         <table class="w-full text-left text-xs font-sans">
           <thead class="bg-neutral-200 dark:bg-neutral-950 border-b-2 border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-neutral-200 font-display uppercase tracking-wider text-[11px]">
             <tr>
-              <th class="py-3 px-4 font-extrabold w-28">Epic Key</th>
-              <th class="py-3 px-4 font-extrabold w-56">Epic Title</th>
+              <th class="py-3 px-4 font-extrabold w-72">EPIC</th>
               <th class="py-3 px-4 font-extrabold">Business Value / Narrative</th>
               <th class="py-3 px-4 font-extrabold">Acceptance Criteria</th>
-              <th class="py-3 px-4 font-extrabold w-52 text-right">User Stories</th>
             </tr>
           </thead>
           <tbody class="divide-y-2 divide-neutral-200 dark:divide-neutral-800">
             {#each filteredEpics as ep}
               {@const epicStories = getEpicStories(ep.id)}
+              {@const isExpanded = !!expandedEpicStories[ep.id]}
               <tr class="hover:bg-neutral-100 dark:hover:bg-neutral-800/60 transition-colors">
-                <td class="py-4 px-4 font-mono text-[11px] font-bold text-neutral-900 dark:text-neutral-100 align-top">{ep.id}</td>
-                <td class="py-4 px-4 font-extrabold font-display text-neutral-950 dark:text-white align-top">{ep.title}</td>
+                <td class="py-4 px-4 align-top space-y-2.5">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="font-mono text-[11px] font-bold text-neutral-900 dark:text-neutral-100">{ep.id}</span>
+                    {#if epicStories.length > 0}
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 text-emerald-950 border border-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-200 dark:border-emerald-500 font-mono text-[10px] font-black uppercase">
+                        ✓ {epicStories.length} {epicStories.length === 1 ? 'Story' : 'Stories'}
+                      </span>
+                    {:else}
+                      <span class="inline-flex items-center px-1.5 py-0.5 bg-neutral-100 text-neutral-500 border border-neutral-300 dark:bg-neutral-800 dark:text-neutral-400 dark:border-neutral-700 font-mono text-[9px] font-semibold uppercase">
+                        0 Stories
+                      </span>
+                    {/if}
+                  </div>
+                  <h4 class="font-extrabold font-display text-neutral-950 dark:text-white text-xs leading-snug">
+                    {ep.title}
+                  </h4>
+                  <div class="pt-1">
+                    <button
+                      type="button"
+                      onclick={() => toggleExpandEpic(ep.id)}
+                      class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider border transition-colors cursor-pointer {isExpanded ? 'bg-neutral-800 text-white border-black dark:bg-neutral-200 dark:text-black dark:border-white' : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-900 border-neutral-400 dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:text-neutral-100 dark:border-neutral-600'}"
+                      title={isExpanded ? 'Collapse story generation section' : 'Open custom prompt to generate user stories'}
+                    >
+                      <span>{isExpanded ? '▲ Hide Stories & Prompt' : (epicStories.length > 0 ? '▼ Stories & Prompt' : '⚡ Generate Stories')}</span>
+                    </button>
+                  </div>
+                </td>
                 <td class="py-4 px-4 text-neutral-800 dark:text-neutral-200 font-medium leading-relaxed align-top">{ep.business_value || ep.summary}</td>
                 <td class="py-4 px-4 text-[11px] font-mono text-neutral-700 dark:text-neutral-300 align-top">
                   <ul class="list-disc list-inside space-y-1">
@@ -147,43 +171,10 @@
                     {/each}
                   </ul>
                 </td>
-                <td class="py-4 px-4 text-right align-top">
-                  <div class="flex flex-col items-end gap-1.5">
-                    <div class="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onclick={() => toggleExpandEpic(ep.id)}
-                        class="text-[10px] font-bold text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white underline cursor-pointer"
-                      >
-                        {expandedEpicStories[ep.id]
-                          ? (epicStories.length > 0 ? 'Hide Stories ▲' : 'Hide Prompt ▲')
-                          : (epicStories.length > 0 ? 'View Stories ▼' : '+ Custom Prompt')}
-                      </button>
-                      {#if epicStories.length > 0}
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 text-emerald-950 border border-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-200 dark:border-emerald-500 font-mono text-[10px] font-black uppercase">
-                          ✓ {epicStories.length} {epicStories.length === 1 ? 'Story' : 'Stories'}
-                        </span>
-                      {/if}
-                    </div>
-                    <button
-                      type="button"
-                      disabled={workflowStore.isStreaming || workflowStore.rateLimitCountdown > 0}
-                      onclick={() => handleGenerateStoriesForEpic(ep.id)}
-                      class="px-3 py-1.5 bg-neutral-900 hover:bg-black text-white dark:bg-neutral-100 dark:text-black dark:hover:bg-white text-[11px] font-black uppercase tracking-wider border border-neutral-700 dark:border-neutral-300 transition-colors cursor-pointer disabled:opacity-40 whitespace-nowrap shadow-2xs"
-                      title="Generate user stories specifically for {ep.id}"
-                    >
-                      {generatingEpicId === ep.id
-                        ? '⏳ Generating...'
-                        : epicStories.length > 0
-                        ? '🔄 Regenerate Stories'
-                        : '⚡ Generate User Stories'}
-                    </button>
-                  </div>
-                </td>
               </tr>
               {#if expandedEpicStories[ep.id]}
                 <tr class="bg-neutral-50 dark:bg-neutral-950 border-t border-neutral-200 dark:border-neutral-800">
-                  <td colspan="5" class="p-4 space-y-3">
+                  <td colspan="3" class="p-4 space-y-3">
                     <!-- Input area above 'Stories Generated for' pane -->
                     <div class="border-2 border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-950 p-3.5 space-y-2 shadow-2xs">
                       <div class="flex items-center justify-between">

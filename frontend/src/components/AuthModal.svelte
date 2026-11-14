@@ -67,19 +67,36 @@
   }
 </script>
 
+<svelte:window
+  onkeydown={(e) => {
+    if (e.key === 'Escape' && auth.authModalOpen) {
+      auth.authModalOpen = false;
+    }
+  }}
+/>
+
 {#if auth.authModalOpen}
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-4">
-    <div class="bg-white dark:bg-neutral-900 border-2 border-black dark:border-white p-6 max-w-md w-full shadow-2xl space-y-5">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="auth-modal-title"
+      class="bg-white dark:bg-neutral-900 border-2 border-black dark:border-white p-6 max-w-md w-full shadow-2xl space-y-5"
+    >
       <div class="flex items-center justify-between pb-3 border-b-2 border-neutral-300 dark:border-neutral-700">
         <div class="flex items-center gap-2">
           <div class="w-3 h-3 bg-[#86BC25]"></div>
-          <h3 class="text-sm font-black uppercase tracking-wider text-neutral-950 dark:text-white font-display">
+          <h3
+            id="auth-modal-title"
+            class="text-sm font-black uppercase tracking-wider text-neutral-950 dark:text-white font-display"
+          >
             {currentTab === 'signin' ? 'Sign In' : 'Set Permanent Password'}
           </h3>
         </div>
         <button
           type="button"
           onclick={() => (auth.authModalOpen = false)}
+          aria-label="Close dialog"
           class="text-neutral-500 hover:text-black dark:hover:text-white font-mono font-bold text-sm cursor-pointer"
         >
           ✕

@@ -106,7 +106,6 @@
             <th class="py-3 px-4 font-extrabold w-28">Story Key</th>
             <th class="py-3 px-4 font-extrabold w-64">Test Title</th>
             <th class="py-3 px-4 font-extrabold w-28">Test Type</th>
-            <th class="py-3 px-4 font-extrabold w-24">Priority</th>
             <th class="py-3 px-4 font-extrabold">Pre-conditions & Execution Steps</th>
           </tr>
         </thead>
@@ -121,7 +120,6 @@
                   {tc.test_type}
                 </span>
               </td>
-              <td class="py-4 px-4 font-mono text-[10px] font-bold">{tc.priority}</td>
               <td class="py-4 px-4 text-xs font-mono space-y-2">
                 {#if tc.preconditions && tc.preconditions.length > 0}
                   <div class="text-[10px] text-neutral-500 pb-1">
@@ -134,7 +132,7 @@
                       {#if typeof step === 'string'}
                         <span class="text-neutral-950 dark:text-white">{step}</span>
                       {:else}
-                        <span class="font-bold text-neutral-950 dark:text-white">{step.action || step.step || ''}</span>
+                        <span class="font-bold text-neutral-950 dark:text-white">{step.action || ''}</span>
                         {#if step.expected_result}
                           <span class="text-neutral-500 dark:text-neutral-400 block pl-4">→ Expected: {step.expected_result}</span>
                         {/if}
