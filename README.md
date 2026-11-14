@@ -17,9 +17,13 @@ IntelliQ transforms meeting transcripts, architectural diagrams, specification P
 | **ADR-04** | Edge-Guarded Auth & OAC SigV4 Hashing | Cognito Lite tier ($0 idle, 10k+ free MAUs). Frontend computes **`x-amz-content-sha256`** via native Web Crypto API for CloudFront OAC SigV4 integrity. Atomic DynamoDB rate limiting. Cached RS256 JWKS validation. |
 | **ADR-05** | Streaming LLM Engine & Free Cascade | Zero heavy vendor SDKs (lean `httpx` HTTP/2 SSE streaming). Free-tier cascade: **Google Gemini 2.5 Flash / Pro** (Primary) → **Groq Cloud / OpenRouter** (Secondary) → Fallback. DynamoDB and EMF telemetry flushed in async generator `finally:` block before closing `event: done`. |
 | **ADR-06** | Structured Output Schema Contracts | Canonical JSON schemas in `schemas/` synchronized with compiled Pydantic v2 models and TypeScript interfaces. |
-| **ADR-07** | High-Fidelity Reactive SPA | Vite + **Svelte 5 Runes** (`$state`, `$derived`, `$state.raw`) + **Tailwind CSS v4** conforming to the **Deloitte Enterprise UI Spec** (**`border-radius: 0px !important`**, WCAG AAA contrast, `#86BC25` accent discipline). 60fps `requestAnimationFrame` batching & markdown fence healer. |
+| **ADR-07** | High-Fidelity Reactive SPA | Vite + **Svelte 5 Runes** (`$state`, `$derived`, `$state.raw`) + **Tailwind CSS v4** conforming to the **Geometric Enterprise UI Spec** (**`border-radius: 0px !important`**, WCAG AAA contrast, `#86BC25` accent discipline). 60fps `requestAnimationFrame` batching & markdown fence healer. |
 | **ADR-08** | First-Class Local DX via `uv` | Python 3.13 lockfiles managed strictly with `uv`. |
 | **ADR-09** | Single-Table State & S3 Offloading | DynamoDB single-table design with 24-hour idempotency locks. Payloads > 350 KB automatically compressed (`gzip`) and offloaded to S3. |
+| **ADR-10** | Resilient Real-Time AI Stream Processing | Line-buffered SSE parsing, automatic markdown fence healing for incomplete chunks, 60fps `requestAnimationFrame` token batching, and `AbortController` stream lifecycle management. |
+| **ADR-11** | Zero-Regression Multi-Tier Quality Gate | Zero-error TypeScript/framework type check gatekeeping (`svelte-check`), in-memory unit tests for state machines/parsers (Vitest), synthetic mock stream stress tests, and automated E2E browser flows. |
+| **ADR-12** | Zero-Dependency URL-State Hydration | Lightweight native browser history synchronization (`pushState`/`replaceState`/hash parameters) for deep-linkable views and session hydration without heavy client-side router packages. |
+| **ADR-13** | Rigid Enterprise Design System & Accessibility | Universal strict `border-radius: 0px !important`, high-contrast 2px focus rings (`:focus-visible`), focus-trapped dialogs, monospaced technical metadata, and WCAG 2.1 AA `aria-live` streaming announcers. |
 
 ---
 
@@ -110,4 +114,3 @@ SST outputs your CloudFront distribution URL:
    bucketName: intelliq-Storage
 ```
 Open the `routerUrl` to access the live production application.
-

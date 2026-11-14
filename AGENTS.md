@@ -3,7 +3,7 @@
 ## Mission & Principles
 **IntelliQ** is an enterprise-grade, scale-to-zero serverless AI application designed to run permanently with **$0 idle cost** by staying within AWS Always-Free tier thresholds. Every line of code, infrastructure construct, and data pattern must strictly conform to these rules.
 
-## The Invariant Architectural Directives (ADR-01 through ADR-09)
+## The Invariant Architectural Directives (ADR-01 through ADR-13)
 
 1. **ADR-01: Scale-to-Zero & Free-Tier Guardrails**
    - Compute: Only AWS Lambda Python 3.13 on ARM64 (Graviton). No EC2, ECS, NAT Gateways, RDS, or VPC endpoints.
@@ -31,7 +31,7 @@
    - Lambda freezes immediately when generator ends: flush DynamoDB state and EMF logs in `finally:` block *prior* to `event: done`.
 6. **ADR-06: Native Structured Outputs & Strict Contracts**
    - All structured outputs conform to `schemas/*.schema.json` and compiled Pydantic v2 models.
-7. **ADR-07: Reactive Frontend (Svelte 5 Runes + Deloitte Enterprise UI)**
+7. **ADR-07: Reactive Frontend (Svelte 5 Runes + Geometric Enterprise UI)**
    - Strict 0px border-radius (`border-radius: 0px !important`). Strictly no rounded pills, soft inputs, or circular avatars.
    - Svelte 5 Runes only (`$state`, `$state.raw`, `$derived`, `$effect`, `$props`). No Svelte 4 legacy syntax.
    - Tailwind CSS v4 (`@tailwindcss/vite`).
@@ -42,4 +42,22 @@
    - Single-table composite keys (`PK`, `SK`, `GSI1PK`, `GSI1SK`).
    - Payloads > 350 KB must be gzip-compressed and stored in S3.
    - Idempotency locks stored with 24-hour TTL.
-
+10. **ADR-10: Resilient Real-Time AI Stream Processing & Chunk Fence Healing**
+    - Line-Buffered Chunk Processing: Incremental line buffering prior to SSE parsing. Never assume a single network chunk contains a complete semantic token or SSE event.
+    - Dynamic Markdown & Delimiter Healing: Detect unclosed fences (code blocks, quotes, structural tables) and auto-heal in rendering buffer to prevent UI layout breakage during streaming.
+    - Frame-Throttled Rendering (`requestAnimationFrame`): Batch high-velocity streaming text updates to 60fps to prevent main-thread UI lockups.
+    - Idempotency & Lifecycle Controls: Every streaming request must provide an explicit cancellation handle (`AbortController`), an idempotency key header, and visual indicators for all stream states.
+11. **ADR-11: Zero-Regression Multi-Tier UI Quality Gate**
+    - Strict Type-Level Gatekeeping: Zero-warning/zero-error TypeScript and framework diagnostic compilation prior to build (`npm run check`).
+    - Headless Unit & State Testing: Business logic, reactive stores/state machines, cryptographic operations, and protocol parsers tested via in-memory runner (Vitest).
+    - Contract-Driven Mock Streams: UI streaming consumers tested with synthetic, reproducible stream generators simulating token delays, network drops, and corrupted chunks.
+    - End-to-End User Flow Verification: Critical paths tested in automated headless browser environments before deployments.
+12. **ADR-12: Zero-Dependency URL-State Hydration & Deep Linking**
+    - Native History/URL Synchronization: Active resource identifiers and multi-step view stages synchronize directly with browser location (`pushState`/`replaceState` or hash parameters) without heavy third-party routing dependencies.
+    - Bidirectional Hydration: Initial mount hydrates state from URL parameters; UI state changes reflect into query/hash parameters without full-page reloads.
+    - Graceful Fallback: Missing or invalid route entities recover gracefully to default state with polite user notification.
+13. **ADR-13: Rigid Architectural Design System & Universal Accessibility Standards**
+    - Geometric Design Tokens (Strict 0px Radius): Universal `border-radius: 0px !important` across all primitives (buttons, inputs, cards, dialogs, badges). No rounded pills or circular avatars.
+    - High-Density Typography & Monospacing: Structural headers and technical metadata prioritize clean sans-serif and monospace fonts.
+    - Mandatory Focus Rings & Keyboard Navigation: Explicit, high-contrast 2px focus ring (`:focus-visible`). Modals and drawers must implement focus trapping and support `Escape` key cancellation.
+    - Accessible Dynamic AI Announcers: Streaming outputs and notifications must use appropriate ARIA live regions (`aria-live="polite"` or `role="status"`).

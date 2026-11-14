@@ -16,6 +16,7 @@
   },
   "svelte.enable-ts-plugin": true,
   "files.trimTrailingWhitespace": true,
-  "files.insertFinalNewline": true
+  "files.insertFinalNewline": true,
+  "python.terminal.useEnvFile": true
 }
 

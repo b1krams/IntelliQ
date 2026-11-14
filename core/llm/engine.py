@@ -425,11 +425,53 @@ async def execute_cascade_stream(
     start_time = time.time()
     errors: list[str] = []
 
-    # 1. Primary: Google Gemini API Free Tier with high-availability model cascade
+    # 1. Primary: Grok / Groq (Fast Inference / xAI Grok)
+    if settings.groq_api_key:
+        api_key = settings.groq_api_key.strip()
+        is_xai = api_key.startswith("xai-") or (settings.groq_model and "grok" in settings.groq_model.lower())
+        endpoint = "https://api.x.ai/v1/chat/completions" if is_xai else "https://api.groq.com/openai/v1/chat/completions"
+        provider_name = "xAI Grok" if is_xai else "Groq"
+
+        candidate_groq: list[str] = []
+        if settings.groq_model:
+            candidate_groq.append(settings.groq_model.strip())
+        if is_xai:
+            for fallback in ("grok-2", "grok-beta"):
+                if fallback not in candidate_groq:
+                    candidate_groq.append(fallback)
+        else:
+            for fallback in ("openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b", "llama-3.3-70b-versatile"):
+                if fallback not in candidate_groq:
+                    candidate_groq.append(fallback)
+
+        for model_name in candidate_groq:
+            try:
+                logger.info("Calling %s (%s) for stage %s...", provider_name, model_name, stage)
+                token_count = 0
+                async for token in stream_openai_compatible(
+                    endpoint_url=endpoint,
+                    api_key=api_key,
+                    model=model_name,
+                    system_instruction=system_instruction,
+                    prompt=prompt,
+                ):
+                    token_count += 1
+                    yield token
+                latency = (time.time() - start_time) * 1000
+                emit_llm_execution_metrics(provider_name, model_name, stage, latency, completion_tokens=token_count)
+                return
+            except Exception as e:
+                err_msg = f"{provider_name} ({model_name}): {e}"
+                logger.warning("%s model %s failed (%s), trying next candidate...", provider_name, model_name, e)
+                errors.append(err_msg)
+    else:
+        errors.append("GROQ_API_KEY / GROK_API_KEY is not configured")
+
+    # 2. Secondary: Google Gemini API Free Tier with high-availability model cascade
     if settings.gemini_api_key and settings.gemini_model:
         primary_model = settings.gemini_model.strip()
         candidate_models = [primary_model]
-        for fallback in ("gemini-2.5-flash", "gemini-2.5-flash-lite"):
+        for fallback in ("gemini-flash-lite-latest", "gemini-3.1-flash-lite", "gemini-2.5-flash", "gemini-2.5-flash-lite"):
             if fallback not in candidate_models:
                 candidate_models.append(fallback)
 
@@ -457,34 +499,6 @@ async def execute_cascade_stream(
         errors.append("GEMINI_API_KEY is not configured")
     elif not settings.gemini_model:
         errors.append("GEMINI_MODEL is not configured")
-
-    # 2. Secondary: Groq Cloud Free Tier
-    if settings.groq_api_key and settings.groq_model:
-        model_name = settings.groq_model.strip()
-        try:
-            logger.info("Calling Groq Cloud (%s) for stage %s...", model_name, stage)
-            token_count = 0
-            endpoint = "https://api.groq.com/openai/v1/chat/completions"
-            async for token in stream_openai_compatible(
-                endpoint_url=endpoint,
-                api_key=settings.groq_api_key,
-                model=model_name,
-                system_instruction=system_instruction,
-                prompt=prompt,
-            ):
-                token_count += 1
-                yield token
-            latency = (time.time() - start_time) * 1000
-            emit_llm_execution_metrics("Groq", model_name, stage, latency, completion_tokens=token_count)
-            return
-        except Exception as e:
-            err_msg = f"Groq ({model_name}): {e}"
-            logger.warning("Groq Cloud call failed (%s)...", e)
-            errors.append(err_msg)
-    elif not settings.groq_api_key:
-        errors.append("GROQ_API_KEY is not configured")
-    elif not settings.groq_model:
-        errors.append("GROQ_MODEL is not configured")
 
     # 3. Handle failure strictly - NEVER generate mock content
     technical_err = f"All LLM providers in cascade failed for stage '{stage}'. " + "; ".join(errors)
