@@ -27,7 +27,8 @@
     const res = await auth.login(email, password);
     isSubmitting = false;
     if (res.success) {
-      workflowStore.showToast(`Signed in as ${email}`);
+      const displayName = auth.user?.given_name || auth.user?.name || email;
+      workflowStore.showToast(`Signed in as ${displayName}`);
     } else if (res.challenge === 'NEW_PASSWORD_REQUIRED') {
       challengeSession = res.session || '';
       currentTab = 'new_password';
@@ -60,7 +61,8 @@
     const res = await auth.completeNewPassword(email, newPassword, challengeSession);
     isSubmitting = false;
     if (res.success) {
-      workflowStore.showToast(`Permanent password updated. Signed in as ${email}`);
+      const displayName = auth.user?.given_name || auth.user?.name || email;
+      workflowStore.showToast(`Permanent password updated. Signed in as ${displayName}`);
     } else {
       errorMessage = res.error || 'Failed to set permanent password. Please ensure it contains uppercase, lowercase, number, and symbol.';
     }

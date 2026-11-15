@@ -92,7 +92,17 @@ def handle_login(body: dict[str, Any]) -> dict[str, Any]:
             try:
                 claims = verify_jwt_token(auth_res["id_token"])
             except Exception:
-                pass
+                try:
+                    claims = jwt.decode(auth_res["id_token"], options={"verify_signature": False})
+                except Exception:
+                    pass
+
+        given_name = claims.get("given_name")
+        display_name = (
+            given_name
+            or claims.get("name")
+            or email.split("@")[0].replace(".", " ").title()
+        )
 
         return _json_resp(200, {
             "access_token": auth_res["access_token"],
@@ -101,7 +111,8 @@ def handle_login(body: dict[str, Any]) -> dict[str, Any]:
             "user": {
                 "sub": claims.get("sub", auth_res["access_token"][:12]),
                 "email": claims.get("email", email),
-                "name": claims.get("name") or email.split("@")[0].replace(".", " ").title(),
+                "given_name": given_name,
+                "name": display_name,
                 "role": "Lead Architect",
             },
         })
@@ -125,7 +136,17 @@ def handle_new_password(body: dict[str, Any]) -> dict[str, Any]:
             try:
                 claims = verify_jwt_token(auth_res["id_token"])
             except Exception:
-                pass
+                try:
+                    claims = jwt.decode(auth_res["id_token"], options={"verify_signature": False})
+                except Exception:
+                    pass
+
+        given_name = claims.get("given_name")
+        display_name = (
+            given_name
+            or claims.get("name")
+            or email.split("@")[0].replace(".", " ").title()
+        )
 
         return _json_resp(200, {
             "access_token": auth_res["access_token"],
@@ -134,7 +155,8 @@ def handle_new_password(body: dict[str, Any]) -> dict[str, Any]:
             "user": {
                 "sub": claims.get("sub", auth_res["access_token"][:12]),
                 "email": claims.get("email", email),
-                "name": claims.get("name") or email.split("@")[0].replace(".", " ").title(),
+                "given_name": given_name,
+                "name": display_name,
                 "role": "Lead Architect",
             },
         })

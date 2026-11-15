@@ -11,6 +11,27 @@ interface AuthTokens {
   expiresAt: number;
 }
 
+/**
+ * Browser-native Zero-SDK JWT claim parser for extracting Cognito ID token claims.
+ */
+export function parseJwtClaims(token: string): Record<string, any> {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return {};
+    const base64Url = parts[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch {
+    return {};
+  }
+}
+
 class AuthStore {
   user = $state<UserProfile | null>(null);
   tokens = $state<AuthTokens | null>(null);
@@ -25,9 +46,20 @@ class AuthStore {
     try {
       const savedUser = localStorage.getItem('intelliq_user');
       const savedTokens = localStorage.getItem('intelliq_tokens');
-      if (savedUser && savedTokens) {
-        this.user = JSON.parse(savedUser);
+      if (savedTokens) {
         this.tokens = JSON.parse(savedTokens);
+        const claims = this.tokens?.idToken ? parseJwtClaims(this.tokens.idToken) : {};
+        if (savedUser) {
+          const parsedUser: UserProfile = JSON.parse(savedUser);
+          const givenName = claims.given_name || parsedUser.given_name;
+          this.user = {
+            ...parsedUser,
+            given_name: givenName,
+            name: givenName || parsedUser.name || parsedUser.email,
+          };
+        }
+      } else if (savedUser) {
+        this.user = JSON.parse(savedUser);
       }
     } catch (e) {
       console.warn('Failed to load persisted auth:', e);
@@ -35,9 +67,16 @@ class AuthStore {
   }
 
   setSession(tokens: AuthTokens, user: UserProfile) {
+    const claims = tokens.idToken ? parseJwtClaims(tokens.idToken) : {};
+    const givenName = claims.given_name || user.given_name;
+    const resolvedUser: UserProfile = {
+      ...user,
+      given_name: givenName,
+      name: givenName || user.name || user.email,
+    };
     this.tokens = tokens;
-    this.user = user;
-    localStorage.setItem('intelliq_user', JSON.stringify(user));
+    this.user = resolvedUser;
+    localStorage.setItem('intelliq_user', JSON.stringify(resolvedUser));
     localStorage.setItem('intelliq_tokens', JSON.stringify(tokens));
   }
 
@@ -84,6 +123,14 @@ class AuthStore {
           expiresAt: Math.floor(Date.now() / 1000) + 3600,
         };
         localStorage.setItem('intelliq_tokens', JSON.stringify(this.tokens));
+        if (this.user && data.id_token) {
+          const claims = parseJwtClaims(data.id_token);
+          if (claims.given_name) {
+            this.user.given_name = claims.given_name;
+            this.user.name = claims.given_name;
+            localStorage.setItem('intelliq_user', JSON.stringify(this.user));
+          }
+        }
       }
     } catch (e) {
       console.warn('Silent token refresh failed:', e);
@@ -111,6 +158,8 @@ class AuthStore {
         };
       }
 
+      const claims = data.id_token ? parseJwtClaims(data.id_token) : {};
+      const givenName = data.user?.given_name || claims.given_name;
       this.setSession(
         {
           accessToken: data.access_token,
@@ -121,7 +170,8 @@ class AuthStore {
         {
           user_id: data.user.sub,
           email: data.user.email,
-          name: data.user.name || email.split('@')[0],
+          given_name: givenName,
+          name: givenName || data.user.name || email.split('@')[0],
           created_at: new Date().toISOString(),
         }
       );
@@ -144,6 +194,8 @@ class AuthStore {
       if (!res.ok) {
         return { success: false, error: data.error || 'Password update failed' };
       }
+      const claims = data.id_token ? parseJwtClaims(data.id_token) : {};
+      const givenName = data.user?.given_name || claims.given_name;
       this.setSession(
         {
           accessToken: data.access_token,
@@ -154,7 +206,8 @@ class AuthStore {
         {
           user_id: data.user.sub,
           email: data.user.email,
-          name: data.user.name || email.split('@')[0],
+          given_name: givenName,
+          name: givenName || data.user.name || email.split('@')[0],
           created_at: new Date().toISOString(),
         }
       );

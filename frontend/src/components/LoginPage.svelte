@@ -27,7 +27,8 @@
     const res = await auth.login(email, password);
     isSubmitting = false;
     if (res.success) {
-      workflowStore.showToast(`Welcome back, ${email}`);
+      const displayName = auth.user?.given_name || auth.user?.name || email;
+      workflowStore.showToast(`Welcome back, ${displayName}`);
     } else if (res.challenge === 'NEW_PASSWORD_REQUIRED') {
       challengeSession = res.session || '';
       mode = 'new_password';
@@ -60,7 +61,8 @@
     const res = await auth.completeNewPassword(email, newPassword, challengeSession);
     isSubmitting = false;
     if (res.success) {
-      workflowStore.showToast(`Password updated. Welcome, ${email}!`);
+      const displayName = auth.user?.given_name || auth.user?.name || email;
+      workflowStore.showToast(`Password updated. Welcome, ${displayName}!`);
     } else {
       errorMessage = res.error || 'Password does not meet complexity requirements.';
     }

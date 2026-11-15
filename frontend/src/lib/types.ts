@@ -156,6 +156,7 @@ export interface UserProfile {
   user_id: string;
   email: string;
   name: string;
+  given_name?: string;
   created_at: string;
 }
 

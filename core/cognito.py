@@ -85,6 +85,7 @@ def cognito_sign_up(email: str, password: str, name: str | None = None) -> dict[
     user_attrs = [{"Name": "email", "Value": clean_email}]
     if name:
         user_attrs.append({"Name": "name", "Value": name})
+        user_attrs.append({"Name": "given_name", "Value": name})
 
     client = get_cognito_client()
     try:

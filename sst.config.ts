@@ -184,7 +184,7 @@ export default $config({
     const site = new sst.aws.StaticSite("Frontend", {
       path: "frontend",
       build: {
-        command: "npm run build",
+        command: "pnpm run build",
         output: "dist",
       },
       environment: {

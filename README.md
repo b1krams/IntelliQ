@@ -43,7 +43,7 @@ IntelliQ transforms meeting transcripts, architectural diagrams, specification P
 ## 🚀 Quickstart & Local Development
 
 ### Prerequisites
-- Node.js >= 20.x & npm
+- Node.js >= 20.x & [`pnpm`](https://pnpm.io/) (`corepack enable` or `npm install -g pnpm`)
 - Python >= 3.11 with [`uv`](https://docs.astral.sh/uv/) installed
 
 ### 1. Clone & Configure Environment
@@ -57,11 +57,11 @@ Fill in your free Google Gemini API key (`GEMINI_API_KEY`) from [Google AI Studi
 # Backend dependencies via uv
 uv sync --extra dev
 
-# Frontend dependencies
-npm install --prefix frontend
+# All JS/TS dependencies across workspace via pnpm
+pnpm install
 
 # Provision Always-Free Cloud Resources & Sync .env
-npm run provision:aws
+pnpm run provision:aws
 # (or: uv run python scripts/provision_aws.py)
 ```
 This automatically provisions:
@@ -78,7 +78,7 @@ uv run uvicorn lambdas.stream_worker.main:app --port 8080 --reload
 
 **Terminal 2: Start Frontend (Vite + Svelte 5 + Tailwind v4)**
 ```bash
-npm run dev --prefix frontend
+pnpm run frontend:dev
 ```
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
@@ -88,12 +88,14 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 Run the full Python test suite with code coverage and schema verification:
 ```bash
-uv run pytest -v tests/
+uv run --extra dev pytest tests/
 ```
 
-Run frontend type checking and production build test:
+Run frontend type checking, unit tests, and production build:
 ```bash
-npm run build --prefix frontend
+pnpm run frontend:check
+pnpm run frontend:test
+pnpm run frontend:build
 ```
 
 ---
@@ -103,7 +105,8 @@ npm run build --prefix frontend
 Deploy all infrastructure (CloudFront OAC, DynamoDB, S3, Cognito Lite, ARM64 Streaming Lambdas) in one command:
 ```bash
 # First-time deploy or update
-npx sst deploy --stage prod
+pnpm run deploy --stage prod
+# (or: pnpm dlx sst deploy --stage prod)
 ```
 
 SST outputs your CloudFront distribution URL:

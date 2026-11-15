@@ -66,7 +66,7 @@
     {#if auth.isAuthenticated}
       <div class="flex items-center gap-3 bg-neutral-900 border border-neutral-700 px-3 py-1.5 text-xs">
         <span class="w-2 h-2 bg-[#86BC25]"></span>
-        <span class="text-neutral-200 font-medium truncate max-w-[160px]">{auth.user?.name || auth.user?.email}</span>
+        <span class="text-neutral-200 font-medium truncate max-w-[160px]">{auth.user?.given_name || auth.user?.name || auth.user?.email}</span>
         <button
           type="button"
           onclick={() => auth.logout()}

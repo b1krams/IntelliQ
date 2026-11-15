@@ -8,8 +8,10 @@
     "provision:aws": "uv run python scripts/provision_aws.py",
     "build": "sst deploy --stage prod",
     "deploy": "sst deploy",
-    "frontend:dev": "npm run dev --prefix frontend",
-    "frontend:build": "npm run build --prefix frontend",
+    "frontend:dev": "pnpm --filter intelliq-frontend dev",
+    "frontend:build": "pnpm --filter intelliq-frontend build",
+    "frontend:check": "pnpm --filter intelliq-frontend check",
+    "frontend:test": "pnpm --filter intelliq-frontend test",
     "generate:types": "bash scripts/generate_types.sh"
   },
   "devDependencies": {
